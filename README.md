@@ -17,6 +17,15 @@ install.packages("/Path/To/poolSeq_0.3.0.tar.gz", repos=NULL, type="source")
 ```
 
 ## Usage
+### Read sync-files
+Synchronized (sync) files contain allele frequencies at specific genomic loci in multiple populations. Suppose you want to load a sync-file containing allele frequency trajectories of 2 populations (F0.R1, F10.R1, F20.R1, F0.R2, F10.R2, F20.R2). The following command allows you to read such file with poolSeq:
+
+```R
+mySync <- read.sync(file="/Path/to/data.sync", gen=c(0, 10, 20, 0, 10, 20), repl=c(1, 1, 1, 2, 2, 2), rising = FALSE)
+```
+
+Once the data is loaded in R you can easily get allele frequency trajectories for a specific genomic position `pos` on chromosome `chr` in replicate `repl` with `af.traj(mySync, chr, pos, repl)`.
+
 
 [PoPoolation2]: https://sourceforge.net/projects/popoolation2/
 [latest release]: https://github.com/ThomasTaus/poolSeq/releases
