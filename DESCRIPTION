@@ -1,0 +1,11 @@
+Package: poolSeq
+Type: Package
+Title: Simulate and Analyze Pool-seq Data
+Version: 0.3.0
+Author: Thomas Taus
+Maintainer: Thomas Taus <Thomas.Taus@vetmeduni.ac.at>
+Description: The \code{poolSeq} package provides a variety of functions to simulate and analyze Pool-seq data, including estimation of the effective population size, selection coefficients and dominance parameters.
+License: MIT License
+LazyData: TRUE
+Depends: R (>= 3.3.1), data.table (>= 1.9.4), foreach (>= 1.4.2), stringi (>= 0.4-1), matrixStats (>= 0.14.2)
+Imports: methods
