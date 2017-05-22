@@ -47,7 +47,33 @@ simTraj <- matrix(af$p.smpld, nrow=nrow(simTraj), dimnames=dimnames(simTraj))
 simCov <- matrix(af$size, nrow=nrow(simTraj), dimnames=dimnames(simTraj))
 ```
 
+### Estimate effective population size
+Based on the allele frequency data simulated in the previous examples, Ne can be estimated like this:
 
+```R
+estimateNe(p0=simTraj[,"F0"], pt=simTraj[,"F20"], cov0=simCov[,"F0"], covt=simCov[,"F20"], t=20, Ncensus=1000, poolSize=c(300, 300))
+```
+
+### Estimate selection parameters
+poolSeq also enables you to estimate the selection coefficient from time-series data. In the following example, first an allele frequency trajectory is simulated assuming a selection coefficient `s` of 0.1 and co-dominance `h=0.5`. Then s is re-estimated from the simulated data:
+
+```R
+simTraj <- wf.traj(p0=0.05, Ne=1000, t=seq(0, 60, by=10), s=0.1, h=0.5)
+estimateSH(simTraj, Ne=1000, t=seq(0, 60, by=10), h=0.5)
+``
+
+You can also assess, whether the estimate of s is significantly different from 0
+
+```R
+estimateSH(simTraj, Ne=1000, t=seq(0, 60, by=10), h=0.5, simulate.p.value=TRUE)
+```
+
+and compute a confidence interval for the s-estimate:
+
+```R
+est <- estimateSH(simTraj, Ne=1000, t=seq(0, 60, by=10), h=0.5)
+confint(est)
+```
 
 [PoPoolation2]: https://sourceforge.net/projects/popoolation2/
 [latest release]: https://github.com/ThomasTaus/poolSeq/releases
