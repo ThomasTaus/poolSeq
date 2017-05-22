@@ -60,7 +60,7 @@ poolSeq also enables you to estimate the selection coefficient from time-series 
 ```R
 simTraj <- wf.traj(p0=0.05, Ne=1000, t=seq(0, 60, by=10), s=0.1, h=0.5)
 estimateSH(simTraj, Ne=1000, t=seq(0, 60, by=10), h=0.5)
-``
+```
 
 You can also assess, whether the estimate of s is significantly different from 0
 
