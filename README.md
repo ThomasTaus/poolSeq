@@ -24,7 +24,29 @@ Synchronized (sync) files contain allele frequencies at specific genomic loci in
 mySync <- read.sync(file="/Path/to/data.sync", gen=c(0, 10, 20, 0, 10, 20), repl=c(1, 1, 1, 2, 2, 2), rising = FALSE)
 ```
 
-Once the data is loaded in R you can easily get allele frequency trajectories for a specific genomic position `pos` on chromosome `chr` in replicate `repl` with `af.traj(mySync, chr, pos, repl)`.
+Once the data is loaded in R you can easily get allele frequency trajectories for a specific genomic position `pos` on chromosome `chr` in replicate `repl` with `af.traj(mySync, chr, pos, repl)`. Alternatively, allele frequencies and sequence coverage of all genomic loci can be obtained for a given replicate and generation using `af(sync, repl, gen)` or `coverage(sync, repl, gen)`, respectively.
+
+### Simulate Pool-Seq time-series data
+poolSeq enables you to simulate allele frequency trajectories of unlinked loci under a Wright-Fisher model. Assuming an effective population size `Ne` of 1,000 diploid individuals, genetic drift at 10,000 unlinked loci with random starting allele frequencies `p0` over 20 generations can be simulated like this:
+
+```R
+simTraj <- wf.traj(p0=runif(10000, 0, 1), Ne=1000, t=c(0, 10, 20))
+```
+
+Pool-Seq can either be applied using all individuals of a population, or only a subset. Assuming that only 300 out of the 1,000 individuals were selected for Pool-Seq, the resulting sampling noise can be added as follows:
+
+```R
+simTraj <- matrix(sample.alleles(simTraj, size=300, mode="individuals", Ncensus=1000), nrow=nrow(simTraj), dimnames=dimnames(simTraj))
+```
+
+Then sampling noise at an average sequencing coverage of 60x can be added, drawing coverage depths from a Poisson distribution:
+
+```R
+af <- sample.alleles(simTraj, size=60, mode="coverage")
+simTraj <- matrix(af$p.smpld, nrow=nrow(simTraj), dimnames=dimnames(simTraj))
+simCov <- matrix(af$size, nrow=nrow(simTraj), dimnames=dimnames(simTraj))
+```
+
 
 
 [PoPoolation2]: https://sourceforge.net/projects/popoolation2/
