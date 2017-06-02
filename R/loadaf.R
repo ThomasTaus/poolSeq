@@ -193,11 +193,17 @@ coverage <- function(sync, chr, pos, repl, gen) {
   return(if(is.null(snps)) afMat[order(sync@alleles$chr, sync@alleles$pos),] else afMat)
 }
 
-alleles <- function(sync) {
+alleles <- function(sync, chr, pos) {
   # if 'sync' is not inherited from class 'sync' then stop execution
   if(!is.sync(sync))
     stop("Argument 'sync' is not a sync-object.")
 
+  # if 'chr' and 'pos' are specified then return only information for those loci
+  if(!missing(chr) && !missing(pos)) {
+    return(sync@alleles[paste(chr, pos, sep=".")][,1:6,with=FALSE])
+  }
+
+  # otherwise return information on all loci
   return(sync@alleles[order(chr, pos),1:6,with=FALSE])
 }
 

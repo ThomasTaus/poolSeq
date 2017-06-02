@@ -8,12 +8,18 @@ Allelic information
 Extract allelic information, such as reference, minor, major and rising allele, of all genomic loci from a \code{sync} object.
 }
 \usage{
-alleles(sync)
+alleles(sync, chr, pos)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{sync}{
 a \code{sync} object.
+}
+  \item{chr}{
+character vector of chromosome names. If both \code{chr} and \code{pos} are missing (default) allelic information of all loci will be returned.
+}
+  \item{pos}{
+numeric vector of sequence positions. If both \code{chr} and \code{pos} are missing (default) allelic information of all loci will be returned.
 }
 }
 \details{
