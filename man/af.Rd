@@ -8,12 +8,18 @@ Allele frequencies
 Extract allele frequencies of all genomic loci from a \code{sync} object.
 }
 \usage{
-af(sync, repl, gen)
+af(sync, chr, pos, repl, gen)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{sync}{
 a \code{sync} object.
+}
+  \item{chr}{
+character vector of chromosome names. If both \code{chr} and \code{pos} are missing (default) allele frequencies of all loci will be returned.
+}
+  \item{pos}{
+numeric vector of sequence positions. If both \code{chr} and \code{pos} are missing (default) allele frequencies of all loci will be returned.
 }
   \item{repl}{
 numeric vector indicating the replicate(s).

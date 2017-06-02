@@ -139,36 +139,58 @@ af.traj <- function(sync, chr, pos, repl) {
   return(traj)
 }
 
-af <- function(sync, repl, gen) {
+af <- function(sync, chr, pos, repl, gen) {
   # if 'sync' is not inherited from class 'sync' then stop execution
   if(!is.sync(sync))
     stop("Argument 'sync' is not a sync-object.")
 
-  # extract allele frequencies of specified replicates and time points
+  # determine for which replicate and time point allele frequencies should be extracted
   cols <- which(sync@gen %in% (gen <- as.numeric(gen)) & sync@repl %in% (repl <- as.numeric(repl)) & sync@isAF)
   if(length(cols) == 0)
     stop("The combination of 'repl' (", paste(repl, sep=","), ") and 'gen' (", paste(gen), ") does not match the data available in 'sync'.")
-  subAlleles <- sync@alleles[,cols[order(sync@repl[cols], sync@gen[cols])]+6,with=FALSE]
-  afMat <- as.matrix(subAlleles)
-  rownames(afMat) <- sync@alleles$posID
 
-  return(afMat[order(sync@alleles$chr, sync@alleles$pos),])
+  # if required get AF for subset of all SNPs
+  subAlleles <- sync@alleles
+  snps <- NULL
+  if(!missing(chr) && !missing(pos)) {
+    snps <- paste(chr, pos, sep=".")
+    subAlleles <- subAlleles[snps]
+  }
+  subAlleles <- subAlleles[,cols[order(sync@repl[cols], sync@gen[cols])]+6,with=FALSE]
+
+  # convert data.table to matrix
+  afMat <- as.matrix(subAlleles)
+  rownames(afMat) <- if(is.null(snps)) sync@alleles$posID else snps
+
+  # return allele frequencies ordered by chromosome and position, or as specified by 'chr' and 'pos' parameters
+  return(if(is.null(snps)) afMat[order(sync@alleles$chr, sync@alleles$pos),] else afMat)
 }
 
-coverage <- function(sync, repl, gen) {
+coverage <- function(sync, chr, pos, repl, gen) {
   # if 'sync' is not inherited from class 'sync' then stop execution
   if(!is.sync(sync))
     stop("Argument 'sync' is not a sync-object.")
 
-  # extract allele frequencies of specified replicates and time points
+  # determine for which replicate and time point sequence coverages should be extracted
   cols <- which(sync@gen %in% (gen <- as.numeric(gen)) & sync@repl %in% (repl <- as.numeric(repl)) & !sync@isAF)
   if(length(cols) == 0)
     stop("The combination of 'repl' (", paste(repl, sep=","), ") and 'gen' (", paste(gen), ") does not match the data available in 'sync'.")
-  subAlleles <- sync@alleles[,cols[order(sync@repl[cols], sync@gen[cols])]+6,with=FALSE]
-  afMat <- as.matrix(subAlleles)
-  rownames(afMat) <- sync@alleles$posID
 
-  return(afMat[order(sync@alleles$chr, sync@alleles$pos),])
+  # if required get coverages for subset of all SNPs
+  subAlleles <- sync@alleles
+  snps <- NULL
+  if(!missing(chr) && !missing(pos)) {
+    snps <- paste(chr, pos, sep=".")
+    subAlleles <- subAlleles[snps]
+  }
+  subAlleles <- subAlleles[,cols[order(sync@repl[cols], sync@gen[cols])]+6,with=FALSE]
+
+  # convert data.table to matrix
+  afMat <- as.matrix(subAlleles)
+  rownames(afMat) <- if(is.null(snps)) sync@alleles$posID else snps
+
+  # return coverages ordered by chromosome and position, or as specified by 'chr' and 'pos' parameters
+  return(if(is.null(snps)) afMat[order(sync@alleles$chr, sync@alleles$pos),] else afMat)
 }
 
 alleles <- function(sync) {

@@ -8,12 +8,18 @@ Sequence coverages
 Extract sequence coverages of all genomic loci from a \code{sync} object.
 }
 \usage{
-coverage(sync, repl, gen)
+coverage(sync, chr, pos, repl, gen)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{sync}{
 a \code{sync} object.
+}
+  \item{chr}{
+character vector of chromosome names. If both \code{chr} and \code{pos} are missing (default) sequence coverages of all loci will be returned.
+}
+  \item{pos}{
+numeric vector of sequence positions. If both \code{chr} and \code{pos} are missing (default) sequence coverages of all loci will be returned.
 }
   \item{repl}{
 numeric vector indicating the replicate(s).
