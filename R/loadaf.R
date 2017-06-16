@@ -200,7 +200,8 @@ alleles <- function(sync, chr, pos) {
 
   # if 'chr' and 'pos' are specified then return only information for those loci
   if(!missing(chr) && !missing(pos)) {
-    return(sync@alleles[paste(chr, pos, sep=".")][,1:6,with=FALSE])
+    snps <- paste(chr, pos, sep=".")
+    return(sync@alleles[snps][,1:6,with=FALSE])
   }
 
   # otherwise return information on all loci
@@ -225,7 +226,7 @@ read.sync <- function(file, gen, repl, rising=FALSE) {
 
   cat("Reading sync file ...\n")
   # load sync-file
-  syncDt <- read.delim(file, sep="\t", header=FALSE, stringsAsFactors=FALSE)
+  syncDt <- fread(file, sep="\t", header=FALSE, stringsAsFactors=FALSE)
   setDT(syncDt)
   # if either 'gen' or 'repl' are not of propper length then stop
   if((ncol(syncDt)-3) %% length(gen) != 0 || (ncol(syncDt)-3) %% length(repl) != 0)
@@ -235,7 +236,7 @@ read.sync <- function(file, gen, repl, rising=FALSE) {
   cat("Extracting biallelic counts ...\n")
   # extract numeric allele counts for A:T:C:G
   syncCnts <- lapply(syncDt[,-1:-3,with=FALSE], function(col) {
-    matrix(as.numeric(stri_split(col, fixed=":", simplify=TRUE)), ncol=6)[,1:4]
+    matrix(as.numeric(stri_split_fixed(sub("(.*):[0-9]+:[0-9]+$", "\\1", col, perl=TRUE), pattern=":", simplify=TRUE)), ncol=4)
   } ) # <- bottleneck
 
   # get rid of data that is no longer needed
