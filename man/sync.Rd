@@ -37,5 +37,5 @@ Thomas Taus
 }
 
 \seealso{
-\code{\link{read.sync}}, \code{\link{alleles}}, \code{\link{af.traj}}, \code{\link{af}} and \code{\link{coverage}}
+\code{\link{read.sync}}, \code{\link{alleles}}, \code{\link{polarization}}, \code{\link{af.traj}}, \code{\link{af}} and \code{\link{coverage}}
 }

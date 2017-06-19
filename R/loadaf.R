@@ -10,6 +10,7 @@ setClass(Class="sync",
            gen="numeric",
            repl="numeric",
            isAF="logical",
+           polarization="character",
            alleles="data.table"),
 
          # default constructor
@@ -17,6 +18,7 @@ setClass(Class="sync",
            gen=numeric(0),
            repl=numeric(0),
            isAF=logical(0),
+           polarization=character(0),
            alleles=NULL),
 
          # validation
@@ -24,6 +26,10 @@ setClass(Class="sync",
            # length of 'gen', 'repl' and 'isAF' do not all match
            if(!(length(object@gen) == length(object@repl) && length(object@gen) == length(object@isAF))) {
              return(paste0("Lengths of 'gen' (", length(object@gen), "), 'repl' (", length(object@repl), ") and 'isAF' (", length(object@isAF), ") do not all match."))
+           }
+           # check polarization
+           if(!object@polarization %in% c("minor", "rising", "reference")) {
+             return(paste0("Polarization needs to be either 'major', 'rising' or 'reference': ", object@polarization))
            }
            # first six column names are not set as expected
            if(!is.null(object@alleles) && !isTRUE(all.equal(colnames(object@alleles)[1:6], c("chr", "pos", "ref", "major", "minor", "rising")))) {
@@ -71,10 +77,11 @@ setClass(Class="sync",
 # initializer -----
 setMethod("initialize",
           signature="sync",
-          definition=function(.Object, gen, repl, isAF, alleles) {
+          definition=function(.Object, gen, repl, isAF, polarization, alleles) {
             .Object@gen <- gen
             .Object@repl <- repl
             .Object@isAF <- isAF
+            .Object@polarization <- polarization
             .Object@alleles <- alleles
             # call the inspector
             validObject(.Object)
@@ -100,7 +107,9 @@ is.sync <- function(x) {
   return(inherits(x, "sync"))
 }
 
-
+polarization <- function(sync) {
+  sync@polarization
+}
 
 af.traj <- function(sync, chr, pos, repl) {
   # if 'sync' is not inherited from class 'sync' then stop execution
@@ -222,7 +231,9 @@ splitLocusID <- function(id, sep=".") {
 # Convert Sync-file to allele frequency data object -
 # ---------------------------------------------------
 
-read.sync <- function(file, gen, repl, rising=FALSE) {
+read.sync <- function(file, gen, repl, polarization=c("minor", "rising", "reference")) {
+
+  polarization <- match.arg(polarization)
 
   cat("Reading sync file ...\n")
   # load sync-file
@@ -272,6 +283,12 @@ read.sync <- function(file, gen, repl, rising=FALSE) {
                         minor=names(syncCntCol)[which(t(alleleRank) == 3) - 4*seq(0, nrow(alleleRank)-1)],
                         rising=NA_character_)
 
+  # IF POLARIZATION=REFERENCE -> CHECK IF REF-ALLELE IS EITHER MAJOR OR MINOR -> WARNING IF NOT -> POLARIZATION FOR MINOR INSTEAD
+  if(polarization == "reference" && any(alleles$ref != alleles$minor & alleles$ref != alleles$major)) {
+    warning("Cannot polarize for reference allele, because it is not among the two most common alleles for some SNPs. Changing polarization to 'minor'.")
+    polarization <- "minor"
+  }
+
   # combine generation and replicate info
   popInfo <- data.table(pop=1:popCnt, gen=gen, repl=repl)
 
@@ -279,13 +296,18 @@ read.sync <- function(file, gen, repl, rising=FALSE) {
   for(r in unique(repl)) {
     for(i in seq(1:nrow(popInfo))[popInfo$repl == r]) {
       seqCov <- rowSums(alleleCnts[[i]])
-      alleles[,paste0("F", popInfo$gen[i], ".R", r, ".freq"):=alleleCnts[[i]][,"minor"]/seqCov]
+      # compute allele frequencies according to 'polarization'
+      if(polarization == "minor" || polarization == "rising") {
+        alleles[,paste0("F", popInfo$gen[i], ".R", r, ".freq"):=alleleCnts[[i]][,"minor"]/seqCov]
+      } else {
+        alleles[,paste0("F", popInfo$gen[i], ".R", r, ".freq"):=ifelse(minor == ref, alleleCnts[[i]][,"minor"]/seqCov, alleleCnts[[i]][,"major"]/seqCov)]
+      }
       alleles[,paste0("F", popInfo$gen[i], ".R", r, ".cov"):=seqCov]
     }
   }
 
   # if required then polarize allele counts for the rising allele
-  if(rising && length(unique(popInfo$gen)) > 1) {
+  if(polarization == "rising" && length(unique(popInfo$gen)) > 1) {
     ugens <- unique(popInfo$gen)
     minGen <- min(popInfo$gen)
 
@@ -313,5 +335,6 @@ read.sync <- function(file, gen, repl, rising=FALSE) {
              gen=as.numeric(sub("F([0-9]+)\\.R[0-9]+.*", "\\1", colnames(alleles)[-1:-6])),
              repl=as.numeric(sub(".*\\.R([0-9]+)\\..*", "\\1", colnames(alleles)[-1:-6])),
              isAF=grepl(".*\\.freq$", colnames(alleles)[-1:-6]),
+             polarization=polarization,
              alleles=alleles))
 }

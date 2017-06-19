@@ -46,7 +46,7 @@ Thomas Taus
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-\code{\link{af}} and \code{\link{af.traj}}.
+\code{\link{polarization}}, \code{\link{af}} and \code{\link{af.traj}}.
 }
 \examples{
 

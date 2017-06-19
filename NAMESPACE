@@ -4,7 +4,7 @@ importFrom("methods", "new", "validObject")
 importFrom("stats", "coef", "nls", "pchisq", "quantile", "rbinom", "rhyper", "rpois", "runif")
 importFrom("utils", "read.delim")
 
-export("af", "af.traj", "alleles", "checkSNP", "chi.sq.test", "cmh.test", "consensus.traj", "coverage",
+export("af", "af.traj", "polarization", "alleles", "checkSNP", "chi.sq.test", "cmh.test", "consensus.traj", "coverage",
        "estimateNe", "scaleAF", "fixationBias", "estimateSH", "lm.s", "nls.sh", "print.estsh", "coef.estsh", "confint.estsh", "compareSH", "print.compsh",
        "estimateWndNe", "read.sync", "sample.alleles", "splitLocusID", "wf.traj")
 exportClasses("sync")
