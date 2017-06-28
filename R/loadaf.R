@@ -283,7 +283,7 @@ read.sync <- function(file, gen, repl, polarization=c("minor", "rising", "refere
                         minor=names(syncCntCol)[which(t(alleleRank) == 3) - 4*seq(0, nrow(alleleRank)-1)],
                         rising=NA_character_)
 
-  # IF POLARIZATION=REFERENCE -> CHECK IF REF-ALLELE IS EITHER MAJOR OR MINOR -> WARNING IF NOT -> POLARIZATION FOR MINOR INSTEAD
+  # if polarization is 'reference' -> check if ref-allele is either major or minor -> warning if not and polarization for minor instead
   if(polarization == "reference" && any(alleles$ref != alleles$minor & alleles$ref != alleles$major)) {
     warning("Cannot polarize for reference allele, because it is not among the two most common alleles for some SNPs. Changing polarization to 'minor'.")
     polarization <- "minor"
@@ -312,12 +312,14 @@ read.sync <- function(file, gen, repl, polarization=c("minor", "rising", "refere
     minGen <- min(popInfo$gen)
 
     # if minGen allele frequency column is not available for all replicates then stop execution
-    if(sum(grepl(paste0("F", minGen, "\\.[R0-9]+\\.freq"), colnames(alleles))) != length(unique(repl)))
-      stop("Not all replicates provide allele frequency estimates at generation F", minGen)
+    #if(sum(grepl(paste0("F", minGen, "\\.[R0-9]+\\.freq"), colnames(alleles))) != length(unique(repl)))
+    #  stop("Cannot polarize for rising allele because not all replicates provide allele frequency estimates at generation F", minGen)
 
     # calculate mean allele frequency change per SNP and replicate
     meanAF <- foreach(r=unique(repl), .combine=cbind, .final=function(x) { if(is.matrix(x)) return(rowMeans(x)) else return(x) }) %do% {
-      rowMeans(alleles[,grepl(paste0("F[0-9]+\\.R", r, "\\.freq"), colnames(alleles)),with=FALSE]-alleles[[which(grepl(paste0("F", minGen, "\\.[R0-9]+\\.freq"), colnames(alleles)))[1]]])
+      allCols <- grep(paste0("F[0-9]+\\.R", r, "\\.freq"), colnames(alleles), value=TRUE)
+      allCols <- allCols[order(as.numeric(sub("F([0-9]+)\\..*", "\\1", allCols)))]
+      rowMeans(alleles[,allCols[-1],with=FALSE]-alleles[[allCols[1]]])
     }
 
     # polarize allele frequencies
