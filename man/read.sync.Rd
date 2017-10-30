@@ -21,7 +21,7 @@ numeric vector specifying the number of generations for each population, see 'De
 numeric vector defining how populations should be grouped by replicate, see 'Details'.
 }
   \item{polarization}{
-character determining, how allele frequencies should be polarized. If \code{polarization = "major"} (default) allele counts are polarized for the minor allele. If \code{polarization = "rising"} or \code{polarization = "reference"} then allele counts are polarized for the rising or reference allele, respectively.
+character determining, how allele frequencies should be polarized. If \code{polarization = "minor"} (default) allele counts are polarized for the minor allele. If \code{polarization = "rising"} or \code{polarization = "reference"} then allele counts are polarized for the rising or reference allele, respectively.
 }
 }
 \details{
