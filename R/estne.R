@@ -114,6 +114,12 @@ estimateNe <- function(p0, pt, cov0, covt, t, ploidy=2, truncAF=NA, method="P.pl
     }
   }
 
+  # set values in res to 'Inf' if they are negative
+  if (sum(res < 0) > 0) {
+      warning("Assuming infinity Ne for negative estimates")
+      res <- ifelse(res < 0, Inf, res)
+  }
+  
   # return either numeric vector or list
   if(asList)
     return(as.list(res))
