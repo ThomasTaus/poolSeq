@@ -1,8 +1,8 @@
-import("data.table", "foreach", "matrixStats", "stringi")
+import("data.table", "foreach", "matrixStats", "stringi", "Rcpp")
 
-importFrom("methods", "new", "validObject")
-importFrom("stats", "coef", "nls", "pchisq", "quantile", "rbinom", "rhyper", "rpois", "runif")
-importFrom("utils", "read.delim")
+importFrom("methods", "new", "validObject", "is")
+importFrom("stats", "var", "lm", "coef", "nls", "nls.control", "pchisq", "quantile", "rbinom", "rhyper", "rpois", "runif")
+importFrom("utils", "read.delim", "tail")
 
 export("af", "af.traj", "polarization", "alleles", "checkSNP", "chi.sq.test", "cmh.test", "consensus.traj", "coverage",
        "estimateNe", "scaleAF", "fixationBias", "estimateSH", "lm.s", "nls.sh", "print.estsh", "coef.estsh", "confint.estsh", "compareSH", "print.compsh",

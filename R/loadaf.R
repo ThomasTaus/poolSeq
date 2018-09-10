@@ -242,13 +242,38 @@ read.sync <- function(file, gen, repl, polarization=c("minor", "rising", "refere
   # if either 'gen' or 'repl' are not of propper length then stop
   if((ncol(syncDt)-3) %% length(gen) != 0 || (ncol(syncDt)-3) %% length(repl) != 0)
     stop("Either 'gen' (", length(gen), ") or 'repl' (", length(repl), ") is not a multiple of the number of populations (", ncol(syncDt)-3, ") specified in the sync-file.")
-  gc()
 
   cat("Extracting biallelic counts ...\n")
+
+  cppFunction({"NumericMatrix Sync2Cnts(CharacterVector sync) {
+  NumericMatrix resMat(sync.length(), 4);
+
+    std::string current;
+    std::string token;
+    size_t posBeg = 0, posEnd = 0;
+    int cnt = 0;
+
+    for(int i=0; i<sync.length(); i++) {
+
+    cnt = 0;
+    posBeg = 0;
+    posEnd = 0;
+    current = Rcpp::as<std::string>(sync(i));
+    while ((posEnd = current.find(\":\", posBeg)) != std::string::npos && cnt <= 3) {
+    token = current.substr(posBeg, posEnd);
+    resMat(i, cnt) = std::stoi(token);
+    posBeg = posEnd+1;
+    cnt++;
+    }
+  }
+
+    return resMat;
+}"})
+
   # extract numeric allele counts for A:T:C:G
   syncCnts <- lapply(syncDt[,-1:-3,with=FALSE], function(col) {
-    matrix(as.numeric(stri_split_fixed(sub("(.*):[0-9]+:[0-9]+$", "\\1", col, perl=TRUE), pattern=":", simplify=TRUE)), ncol=4)
-  } ) # <- bottleneck
+    Sync2Cnts(col)
+  } )
 
   # get rid of data that is no longer needed
   snpCnt <- nrow(syncDt)
@@ -264,10 +289,14 @@ read.sync <- function(file, gen, repl, polarization=c("minor", "rising", "refere
   sumCnts <- sumCnts + runif(nrow(sumCnts)*ncol(sumCnts), min=0, max=0.99)
   # deterime allele ranks for each position
   alleleRank <- rowRanks(sumCnts, ties.method="min")
+  rm(sumCnts)
+  gc()
   # extract 2 most common alleles (considering all populations)
   alleleCnts <- lapply(syncCnts, function(pop) {
-    cbind(major=t(pop)[t(alleleRank) == 4], minor=t(pop)[t(alleleRank) == 3])
-  } ) # <- bottleneck
+    cbind(major=pop[alleleRank == 4], minor=pop[alleleRank == 3])
+  } )
+  rm(syncCnts)
+  gc()
 
   cat("Creating result object ...\n")
   # compute chromosome IDs (to later replace character vector by numeric one)
@@ -282,6 +311,8 @@ read.sync <- function(file, gen, repl, polarization=c("minor", "rising", "refere
                         major=names(syncCntCol)[which(t(alleleRank) == 4) - 4*seq(0, nrow(alleleRank)-1)],
                         minor=names(syncCntCol)[which(t(alleleRank) == 3) - 4*seq(0, nrow(alleleRank)-1)],
                         rising=NA_character_)
+  rm(alleleRank)
+  gc()
 
   # if polarization is 'reference' -> check if ref-allele is either major or minor -> warning if not and polarization for minor instead
   if(polarization == "reference" && any(alleles$ref != alleles$minor & alleles$ref != alleles$major)) {
@@ -305,31 +336,39 @@ read.sync <- function(file, gen, repl, polarization=c("minor", "rising", "refere
       alleles[,paste0("F", popInfo$gen[i], ".R", r, ".cov"):=seqCov]
     }
   }
+  rm(alleleCnts)
+  gc()
 
   # if required then polarize allele counts for the rising allele
   if(polarization == "rising" && length(unique(popInfo$gen)) > 1) {
-    ugens <- unique(popInfo$gen)
     minGen <- min(popInfo$gen)
+    maxGen <- max(popInfo$gen)
+
+    # compute AFC between mean AF at first and last generation
+    meanAF <- rowMeans(alleles[,grepl(paste0("F", maxGen, "\\.R[0-9]+\\.freq"), colnames(alleles)),with=FALSE], na.rm=TRUE) -
+      rowMeans(alleles[,grepl(paste0("F", minGen, "\\.R[0-9]+\\.freq"), colnames(alleles)),with=FALSE], na.rm=TRUE)
 
     # if minGen allele frequency column is not available for all replicates then stop execution
     #if(sum(grepl(paste0("F", minGen, "\\.[R0-9]+\\.freq"), colnames(alleles))) != length(unique(repl)))
     #  stop("Cannot polarize for rising allele because not all replicates provide allele frequency estimates at generation F", minGen)
 
     # calculate mean allele frequency change per SNP and replicate
-    meanAF <- foreach(r=unique(repl), .combine=cbind, .final=function(x) { if(is.matrix(x)) return(rowMeans(x)) else return(x) }) %do% {
-      allCols <- grep(paste0("F[0-9]+\\.R", r, "\\.freq"), colnames(alleles), value=TRUE)
-      allCols <- allCols[order(as.numeric(sub("F([0-9]+)\\..*", "\\1", allCols)))]
-      rowMeans(alleles[,allCols[-1],with=FALSE]-alleles[[allCols[1]]])
-    }
+    #meanAF <- foreach(r=unique(repl), .combine=cbind, .final=function(x) { if(is.matrix(x)) return(rowMeans(x)) else return(x) }) %do% {
+    #  allCols <- grep(paste0("F[0-9]+\\.R", r, "\\.freq"), colnames(alleles), value=TRUE)
+    #  allCols <- allCols[order(as.numeric(sub("F([0-9]+)\\..*", "\\1", allCols)))]
+    #  rowMeans(alleles[,allCols[-1],with=FALSE]-alleles[[allCols[1]]])
+    #}
 
     # polarize allele frequencies
-    needsPolarization <- meanAF < 0
-    for(pop in grep("F[0-9]+\\.R[0-9]+\\.freq", colnames(alleles), value=TRUE)) {
-      alleles[,eval(pop):=ifelse(needsPolarization, 1-alleles[[pop]], alleles[[pop]])]
+    changePolarization <- meanAF < 0
+    for(pop in grep(".freq", colnames(alleles), value=TRUE, fixed=TRUE)) {
+      alleles[[pop]][changePolarization] <- 1-alleles[[pop]][changePolarization]
     }
 
     # set column with rising allele
-    alleles[,rising:=ifelse(needsPolarization, alleles$major, alleles$minor)]
+    alleles$rising <- ifelse(changePolarization, alleles$major, alleles$minor)
+    rm(meanAF, changePolarization)
+    gc()
   }
 
   # return sync-object for loaded sync-file
