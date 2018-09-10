@@ -8,4 +8,3 @@ export("af", "af.traj", "polarization", "alleles", "checkSNP", "chi.sq.test", "c
        "estimateNe", "scaleAF", "fixationBias", "estimateSH", "lm.s", "nls.sh", "print.estsh", "coef.estsh", "confint.estsh", "compareSH", "print.compsh",
        "estimateWndNe", "read.sync", "sample.alleles", "splitLocusID", "wf.traj")
 exportClasses("sync")
-

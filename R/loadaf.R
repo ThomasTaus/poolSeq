@@ -246,7 +246,7 @@ read.sync <- function(file, gen, repl, polarization=c("minor", "rising", "refere
   cat("Extracting biallelic counts ...\n")
 
   cppFunction({"NumericMatrix Sync2Cnts(CharacterVector sync) {
-  NumericMatrix resMat(sync.length(), 4);
+    NumericMatrix resMat(sync.length(), 4);
 
     std::string current;
     std::string token;
@@ -348,17 +348,6 @@ read.sync <- function(file, gen, repl, polarization=c("minor", "rising", "refere
     meanAF <- rowMeans(alleles[,grepl(paste0("F", maxGen, "\\.R[0-9]+\\.freq"), colnames(alleles)),with=FALSE], na.rm=TRUE) -
       rowMeans(alleles[,grepl(paste0("F", minGen, "\\.R[0-9]+\\.freq"), colnames(alleles)),with=FALSE], na.rm=TRUE)
 
-    # if minGen allele frequency column is not available for all replicates then stop execution
-    #if(sum(grepl(paste0("F", minGen, "\\.[R0-9]+\\.freq"), colnames(alleles))) != length(unique(repl)))
-    #  stop("Cannot polarize for rising allele because not all replicates provide allele frequency estimates at generation F", minGen)
-
-    # calculate mean allele frequency change per SNP and replicate
-    #meanAF <- foreach(r=unique(repl), .combine=cbind, .final=function(x) { if(is.matrix(x)) return(rowMeans(x)) else return(x) }) %do% {
-    #  allCols <- grep(paste0("F[0-9]+\\.R", r, "\\.freq"), colnames(alleles), value=TRUE)
-    #  allCols <- allCols[order(as.numeric(sub("F([0-9]+)\\..*", "\\1", allCols)))]
-    #  rowMeans(alleles[,allCols[-1],with=FALSE]-alleles[[allCols[1]]])
-    #}
-
     # polarize allele frequencies
     changePolarization <- meanAF < 0
     for(pop in grep(".freq", colnames(alleles), value=TRUE, fixed=TRUE)) {
@@ -378,4 +367,4 @@ read.sync <- function(file, gen, repl, polarization=c("minor", "rising", "refere
              isAF=grepl(".*\\.freq$", colnames(alleles)[-1:-6]),
              polarization=polarization,
              alleles=alleles))
-}
+  }
