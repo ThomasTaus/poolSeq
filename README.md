@@ -1,6 +1,8 @@
 # poolSeq
 poolSeq is an R-package that allows you to analyze and simulate Pool-Seq time-series data. Its functionality includes estimation of the effective population size and quantification of selective strength, as well as dominance. Besides simulating Pool-Seq data under a specific scenario, you can also load empirical data into R using the common sync-file format (see [PoPoolation2]).
 
+Please cite the related [publication](https://doi.org/10.1093/molbev/msx225): Taus T, Futschik A and Schlötterer C. 2017. Quantifying selection with pool-Seq data. Mol. Bio. Evol. 34:3023-3034. 
+
 ## Installation
 Before installing poolSeq you need to make sure that all the __dependencies__ are available:
 
