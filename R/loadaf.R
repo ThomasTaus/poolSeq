@@ -231,7 +231,7 @@ splitLocusID <- function(id, sep=".") {
 # Convert Sync-file to allele frequency data object -
 # ---------------------------------------------------
 
-read.sync <- function(file, gen, repl, polarization=c("minor", "rising", "reference")) {
+read.sync <- function(file, gen, repl, polarization=c("minor", "rising", "reference"), keepOnlyBiallelic=FALSE) {
 
   polarization <- match.arg(polarization)
 
@@ -276,7 +276,6 @@ read.sync <- function(file, gen, repl, polarization=c("minor", "rising", "refere
   } )
 
   # get rid of data that is no longer needed
-  snpCnt <- nrow(syncDt)
   chr <- as.character(syncDt$V1)
   pos <- syncDt$V2
   ref <- syncDt$V3
@@ -284,8 +283,19 @@ read.sync <- function(file, gen, repl, polarization=c("minor", "rising", "refere
   rm(syncDt)
   gc()
 
-  # sum up counts across populations (time points and replicates) and add e (random uniform >=0 & <= 0.99) to make each count value unique
+  # sum up counts across populations (time points and replicates)
   sumCnts <- Reduce("+", syncCnts)
+
+  # if only biallelic sites should be kept then identify those
+  # else identify polymorphic sites in general
+  ikeep = if(keepOnlyBiallelic) which(rowSums(sumCnts > 0) == 2) else which(rowSums(sumCnts > 0) > 1)
+  # remove data from all other sites
+  sumCnts <- sumCnts[ikeep,]
+  chr <- chr[ikeep]
+  pos <- pos[ikeep]
+  ref <- ref[ikeep]
+
+  # add e (random uniform >=0 & <= 0.99) to make each count value unique
   sumCnts <- sumCnts + runif(nrow(sumCnts)*ncol(sumCnts), min=0, max=0.99)
   # deterime allele ranks for each position
   alleleRank <- rowRanks(sumCnts, ties.method="min")
@@ -293,7 +303,7 @@ read.sync <- function(file, gen, repl, polarization=c("minor", "rising", "refere
   gc()
   # extract 2 most common alleles (considering all populations)
   alleleCnts <- lapply(syncCnts, function(pop) {
-    cbind(major=pop[alleleRank == 4], minor=pop[alleleRank == 3])
+    cbind(major=pop[ikeep,][alleleRank == 4], minor=pop[ikeep,][alleleRank == 3])
   } )
   rm(syncCnts)
   gc()

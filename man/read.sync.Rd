@@ -8,7 +8,7 @@ Read Sync-File Format
 Reads a synchronized file generated e.g. by the \href{http://sourceforge.net/projects/popoolation2/}{Popoolation2} software and extracts biallelic count data. Allele frequencies are polarized either by the minor or the rising allele.
 }
 \usage{
-read.sync(file, gen, repl, polarization = c("minor", "rising", "reference"))
+read.sync(file, gen, repl, polarization = c("minor", "rising", "reference"), keepOnlyBiallelic = FALSE)
 }
 \arguments{
   \item{file}{
@@ -22,6 +22,9 @@ numeric vector defining how populations should be grouped by replicate, see 'Det
 }
   \item{polarization}{
 character determining, how allele frequencies should be polarized. If \code{polarization = "minor"} (default) allele counts are polarized for the minor allele. If \code{polarization = "rising"} or \code{polarization = "reference"} then allele counts are polarized for the rising or reference allele, respectively.
+}
+  \item{keepOnlyBiallelic}{
+specifies if only polymorphic sites should be kept. Combining allele counts of all populations, monomorphic sites will always be removed. If \code{keepOnlyBiallelic = FALSE} (default), then also triallelic sites will be kept. Otherwise (\code{keepOnlyBiallelic = TRUE}), only biallelic sites will be kept.
 }
 }
 \details{
