@@ -131,7 +131,7 @@ estimateWndNe <- function(chr, pos, wndSize, p0, pt, cov0, covt, t, unit=c("bp",
   setkey(dataDt, chr)
 
   # remove SNPs for which Ne cannot/should not be estimated
-  dataDt <- dataDt[checkSNP(p0, pt, cov0, covt),]
+  dataDt <- dataDt[checkSNP(p0, pt, cov0, covt, truncAF),]
 
   # go through each chromosome and return results
   return(foreach(cc=unique(dataDt$chr), .combine=rbind) %do% {
