@@ -303,7 +303,7 @@ read.sync <- function(file, gen, repl, polarization=c("minor", "rising", "refere
   gc()
   # extract 2 most common alleles (considering all populations)
   alleleCnts <- lapply(syncCnts, function(pop) {
-    cbind(major=pop[ikeep,][alleleRank == 4], minor=pop[ikeep,][alleleRank == 3])
+    cbind(major=t(pop[ikeep,])[t(alleleRank == 4)], minor=t(pop[ikeep,])[t(alleleRank == 3)])
   } )
   rm(syncCnts)
   gc()
