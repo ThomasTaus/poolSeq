@@ -295,10 +295,8 @@ read.sync <- function(file, gen, repl, polarization=c("minor", "rising", "refere
   pos <- pos[ikeep]
   ref <- ref[ikeep]
 
-  # add e (random uniform >=0 & <= 0.99) to make each count value unique
-  sumCnts <- sumCnts + runif(nrow(sumCnts)*ncol(sumCnts), min=0, max=0.99)
-  # deterime allele ranks for each position
-  alleleRank <- rowRanks(sumCnts, ties.method="min")
+  # determine allele ranks for each position
+  alleleRank <- rowRanks(sumCnts+rep(1:4/5,each=nrow(sumCnts)))
   rm(sumCnts)
   gc()
   # extract 2 most common alleles (considering all populations)
