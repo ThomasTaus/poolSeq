@@ -245,7 +245,7 @@ read.sync <- function(file, gen, repl, polarization=c("minor", "rising", "refere
 
   cat("Extracting biallelic counts ...\n")
 
-  cppFunction({"NumericMatrix Sync2Cnts(CharacterVector sync) {
+  cppFunction(plugins=c("cpp11"),{"NumericMatrix Sync2Cnts(CharacterVector sync) {
     NumericMatrix resMat(sync.length(), 4);
 
     std::string current;
