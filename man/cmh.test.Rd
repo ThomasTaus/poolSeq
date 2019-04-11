@@ -8,7 +8,7 @@ Vectorized Cochran-Mantel-Haenszel Test for Count Data
 Performs a vectorized version of the Cochran-Mantel-Haenszel (CMH) test with the nullhypothesis that relative allele frequencies are not associated with time point.
 }
 \usage{
-cmh.test(A0, a0, At, at, min.cov = 1, max.cov = 1, min.cnt = 1, log = FALSE)
+cmh.test(A0, a0, At, at, min.cov = 1, max.cov = 1, min.cnt = 1, log = FALSE, return.only.pval = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -27,12 +27,16 @@ numeric indicating the minimal minor allele count. If the sum of minor allele co
   \item{log}{
   logical determining whether p-values should be returned directly (default), or after \code{-log10} transformation (if \code{log = TRUE}).
 }
+  \item{return.only.pval}{
+  logical indicating whether to return only the p-values or p-values and test statistic in a named list.
+  }
 }
 \details{
 \code{max.cov} can be specified in two distinct ways. Values larger than 1 are interpreted as absolute sequence coverage thresholds, while values between 0 and 1 are interpreted as quantile thresholds. If for example \code{max.cov = 0.95} then \code{cmh.test} will return \code{NA} for all loci, where the sequence coverage exceeds the 95\% quantile in any of the replicates or time points. Please note that the quantile thresholds are computed separately for each replicate and time point.
 }
 \value{
-\code{cmh.test} returns a numeric vector of p-values.
+\code{cmh.test} returns either a numeric vector of p-values (\code{return.only.pval = TRUE}),
+or a named list of p-values and test statistic.
 }
 \references{
 Agresti A.: Categorical data analysis (second edition). \emph{New York: Wiley} \bold{2002}

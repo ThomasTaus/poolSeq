@@ -30,6 +30,9 @@ numeric indicating the minimal minor allele count. If the sum of minor allele co
   \item{log}{
   logical determining whether p-values should be returned directly (default), or after \code{-log10} transformation (if \code{log = TRUE}).
 }
+  \item{return.only.pval}{
+  logical indicating whether to return only the p-values or p-values and test statistic in a named list.
+  }
 }
 \details{
 If either \code{At} or \code{at} is missing, then a \emph{goodness-of-fit test} is performed with the nullhypothesis that relative frequencies of \code{A}-alleles are equal to those specified in \code{p0}. If both \code{At} and \code{at} are given, then \emph{Pearson's chi-squared test of independence} is performed with the nullhypothesis that relative allele frequencies are not associated with time point.
@@ -37,7 +40,8 @@ If either \code{At} or \code{at} is missing, then a \emph{goodness-of-fit test} 
 \code{max.cov} can be specified in two distinct ways. Values larger than 1 are interpreted as absolute sequence coverage thresholds, while values between 0 and 1 are interpreted as quantile thresholds. If for example \code{max.cov = 0.95} then \code{chi.sq.test} will return \code{NA} for all loci, where the sequence coverage exceeds the 95\% quantile in any of the replicates or time points. Please note that the quantile thresholds are computed separately for each replicate and time point.
 }
 \value{
-\code{chi.sq.test} returns a numeric vector of p-values.
+\code{chi.sq.test} returns either a numeric vector of p-values (\code{return.only.pval = TRUE}),
+or a named list of p-values and test statistic.
 }
 \references{
 Sokal R. S. and Rohlf F. J.: Biometry (third edition). \emph{New York: W. H. Freeman and Company} \bold{1995}
