@@ -2,7 +2,8 @@
 # Statistical tests to contrast allele frequency data -
 # -----------------------------------------------------
 
-cmh.test <- function(A0, a0, At, at, min.cov = 1, max.cov = 1, min.cnt = 1, log = FALSE) {
+cmh.test <- function(A0, a0, At, at, min.cov = 1, max.cov = 1, min.cnt = 1, log = FALSE,
+                     return.only.pval = TRUE) {
   # make sure that dimensions of A0, a0, At and at are identical
   if(!identical(dim(A0 <- as.matrix(A0)), dim(a0 <- as.matrix(a0))) ||
      !identical(dim(A0), dim(At <- as.matrix(At))) ||
@@ -41,14 +42,25 @@ cmh.test <- function(A0, a0, At, at, min.cov = 1, max.cov = 1, min.cnt = 1, log 
 
   # compute CMH statistic
   n <- A0+a0+At+at
-  CMH.chi <- (abs(colSums(A0-(A0+a0)*(A0+At)/n))-0.5)^2 / (colSums((A0+a0)*(A0+At)*(a0+at)*(At+at)/(n^3-n^2)))
+  CMH.chi <- (abs(colSums(A0-(A0+a0)*(A0+At)/n))-0.5)^2 / 
+    (colSums((A0+a0)*(A0+At)*(a0+at)*(At+at)/(n^3-n^2)))
 
   # return p-values according to chi-squared distribution
   p.value <- pchisq(unname(CMH.chi), df=1, lower.tail=FALSE)
-  return(if(log) -log10(p.value) else p.value)
+  
+  if (return.only.pval)
+    return(if (log) p.value else -log10(p.value))
+  else
+    return(if (log)
+             list(p.value=p.value,
+                  test.statistic=CMH.chi)
+           else 
+             list(log.p.value=-log10(p.value),
+                  test.statistic=CMH.chi))
 }
 
-chi.sq.test <- function(A0, a0, At = NULL, at = NULL, p0 = 0.5, min.cov = 1, max.cov = 1, min.cnt = 1, log = FALSE) {
+chi.sq.test <- function(A0, a0, At = NULL, at = NULL, p0 = 0.5, min.cov = 1, max.cov = 1,
+                        min.cnt = 1, log = FALSE, return.only.pval = TRUE) {
   # make sure that lengths of A0 and a0 are identical
   if(!identical(length(A0 <- as.numeric(A0)), length(a0 <- as.numeric(a0)))) {
     stop("Lengths of 'A0' (", length(A0), ") and 'a0' (", length(a0), ") are not identical.")
@@ -94,7 +106,6 @@ chi.sq.test <- function(A0, a0, At = NULL, at = NULL, p0 = 0.5, min.cov = 1, max
     x <- (abs(A0*at-a0*At)-n/2)^2*n / ((A0+a0)*(At+at)*(A0+At)*(a0+at))
     # return p-values according to chi-squared distribution
     p.value <- pchisq(x, df=1, lower.tail=FALSE)
-    return(if(log) -log10(p.value) else p.value)
 
     # otherwise perform a GOODNESS-OF-FIT TEST (assuming 'A0' to occur at a relative frequency of 'p0')
   } else {
@@ -117,6 +128,15 @@ chi.sq.test <- function(A0, a0, At = NULL, at = NULL, p0 = 0.5, min.cov = 1, max
     x <- (A0-p0*n)^2 / (p0*(1-p0)*n)
     # return p-values according to chi-squared distribution
     p.value <- pchisq(x, df=1, lower.tail=FALSE)
-    return(if(log) -log10(p.value) else p.value)
   }
+  
+  if (return.only.pval)
+    return(if (log) p.value else -log10(p.value))
+  else
+    return(if (log)
+      list(p.value=p.value,
+           test.statistic=CMH.chi)
+      else 
+        list(log.p.value=-log10(p.value),
+             test.statistic=CMH.chi))
 }
