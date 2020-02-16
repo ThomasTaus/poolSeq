@@ -1,7 +1,7 @@
 Package: poolSeq
 Type: Package
 Title: Simulate and Analyze Pool-seq Data
-Version: 0.3.5
+Version: 0.3.5.9000
 Author: Thomas Taus
 Maintainer: Thomas Taus <7homas.7aus@gmail.com>
 Description: The \code{poolSeq} package provides a variety of functions to simulate and analyze Pool-seq data, including estimation of the effective population size, selection coefficients and dominance parameters.
