@@ -290,7 +290,7 @@ read.sync <- function(file, gen, repl, polarization=c("minor", "rising", "refere
   # else identify polymorphic sites in general
   ikeep = if(keepOnlyBiallelic) which(rowSums(sumCnts > 0) == 2) else which(rowSums(sumCnts > 0) > 1)
   # remove data from all other sites
-  sumCnts <- sumCnts[ikeep,]
+  sumCnts <- sumCnts[ikeep, , drop=FALSE]
   chr <- chr[ikeep]
   pos <- pos[ikeep]
   ref <- ref[ikeep]
@@ -301,7 +301,8 @@ read.sync <- function(file, gen, repl, polarization=c("minor", "rising", "refere
   gc()
   # extract 2 most common alleles (considering all populations)
   alleleCnts <- lapply(syncCnts, function(pop) {
-    cbind(major=t(pop[ikeep,])[t(alleleRank == 4)], minor=t(pop[ikeep,])[t(alleleRank == 3)])
+    cbind(major=t(pop[ikeep, ])[t(alleleRank == 4)],
+          minor=t(pop[ikeep, ])[t(alleleRank == 3)])
   } )
   rm(syncCnts)
   gc()
@@ -357,7 +358,7 @@ read.sync <- function(file, gen, repl, polarization=c("minor", "rising", "refere
       rowMeans(alleles[,grepl(paste0("F", minGen, "\\.R[0-9]+\\.freq"), colnames(alleles)),with=FALSE], na.rm=TRUE)
 
     # polarize allele frequencies
-    changePolarization <- meanAF < 0
+    changePolarization <- isTRUE(meanAF < 0)
     for(pop in grep(".freq", colnames(alleles), value=TRUE, fixed=TRUE)) {
       alleles[[pop]][changePolarization] <- 1-alleles[[pop]][changePolarization]
     }
