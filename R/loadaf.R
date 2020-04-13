@@ -295,6 +295,10 @@ read.sync <- function(file, gen, repl, polarization=c("minor", "rising", "refere
   pos <- pos[ikeep]
   ref <- ref[ikeep]
 
+  if (length(ikeep) == 1) {
+    sumCnts <- matrix(sumCnts, nrow=1)
+  }
+
   # determine allele ranks for each position
   alleleRank <- rowRanks(sumCnts+rep(1:4/5,each=nrow(sumCnts)))
   rm(sumCnts)
