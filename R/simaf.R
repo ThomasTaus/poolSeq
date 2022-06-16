@@ -71,6 +71,9 @@ sample.alleles <- function(p, size, mode=c("coverage", "individuals"), Ncensus=N
                 coverage={
                   # if length of 'size' equals '1' then generate target coverage values using the Poisson distribution, otherwise use values of 'size' directly
                   cov <- if(length(size) == 1) rpois(n=maxlen, lambda=size) else size
+                  # Change all zeros in 'cov' to ones. This prevents division by zero in the next line, but makes the assumption that all sites have
+                  # coverage of at least one. Note that sites with zero coverage are extremely rare, especially for larger values of 'size'.
+                  cov[which(cov==0)] <- 1
                   # sample allele frequencies from Binomial distribution based on 'cov' and 'p'
                   p.smpld <- rbinom(n=maxlen, size=cov, prob=p) / cov
                   # return results, including coverage values if they were drawn from a Poisson distribution
